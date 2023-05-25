@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: traefik-deployment
+  namespace: traefik
+  labels:
+    app: traefik
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: traefik
+  template:
+    metadata:
+      labels:
+        app: traefik
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 1
+      containers:
+      - name: traefik
+        image: traefik:v2.9.10
+        ports:
+          - name: web
+            containerPort: 80
+            hostPort: 80
+          - name: websecure
+            containerPort: 443
+            hostPort: 443
+          - name: admin
+            containerPort: 9000
+          - name: metrics
+            containerPort: 9100
+        securityContext:
+          capabilities:
+            drop:
+              - ALL
+            add:
+              - NET_BIND_SERVICE
+        args:
+          - --configfile=/etc/traefik/config/traefik.yaml
+        volumeMounts:
+        - mountPath: /etc/traefik/config
+          name: config
+        - mountPath: /etc/traefik/logs
+          name: logdir
+      volumes:
+        - name: config
+          configMap:
+            name: traefik-config
+        - name: logdir
+          hostPath:
+            path: /data/traefik/logs
+            type: "DirectoryOrCreate"
+      tolerations:
+        - operator: "Exists"

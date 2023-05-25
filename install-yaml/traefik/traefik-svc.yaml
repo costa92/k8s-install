@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: traefik
+  namespace: traefik
+spec:
+  type: NodePort    ## 官网示例为LoadBalancer,为方便演示，此处改为NodePort
+  selector:
+    app: traefik
+  ports:
+    - name: web
+      protocol: TCP
+      port: 80
+      targetPort: 80
+    - name: websecure
+      protocol: TCP
+      port: 443
+      targetPort: 443
+    - name: admin
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+    - name: metrics
+      protocol: TCP
+      port: 9100
+      targetPort: 9100

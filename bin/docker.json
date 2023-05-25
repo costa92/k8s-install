@@ -1,0 +1,8 @@
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "storage-driver": "overlay2",
+  "registry-mirrors": [
+    "https://vrasnuyn.mirror.aliyuncs.com",
+    "https://registry.docker-cn.com"
+  ]
+}
