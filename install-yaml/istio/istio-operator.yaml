@@ -1,0 +1,26 @@
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+metadata:
+  namespace: istio-system
+  name: example-istiocontrolplane
+spec:
+  profile: default
+  components:     # 自定义组件配置
+    ingressGateways: # 自定义 ingressGateway 配置
+      - name: istio-ingreegateway
+        enabled: true # 开启 ingresGateway
+        k8s:   # 自定义ingressGateway的kubernetes 配置
+          service:  # 将 Service类型改成NodePort
+            type: NodePort
+            ports:
+            - port: 15020
+              nodePort: 30520
+              name: status-port
+            - port: 80 # 流量入口80端口映射到NodePort的30080，之后通过节点IP+30080 即可以访问Istio服务
+              nodePort: 30080
+              name: http2
+              targetPort: 8080
+            - port: 443
+              nodePort: 30443
+              name: https
+              targetPort: 8443
