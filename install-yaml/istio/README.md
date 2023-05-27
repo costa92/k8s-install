@@ -126,3 +126,74 @@ service/jaeger-collector created
 ```sh
 > kubectl create -f samples/addons/prometheus.yaml -f samples/addons/grafana.yaml
 ```
+
+## 部署 bookinfo 测试
+
+1. 创建空间 bookinfo
+```sh
+> kubectl create ns bookinfo
+```
+2. 给空间添加一个 label
+```sh
+> kubectl label ns bookinfo istio-injection=enabled
+```
+3. 安装 bookinfo 
+```sh
+> kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml -n bookinfo
+service/details created
+serviceaccount/bookinfo-details created
+deployment.apps/details-v1 created
+service/ratings created
+serviceaccount/bookinfo-ratings created
+deployment.apps/ratings-v1 created
+service/reviews created
+serviceaccount/bookinfo-reviews created
+deployment.apps/reviews-v1 created
+deployment.apps/reviews-v2 created
+deployment.apps/reviews-v3 created
+service/productpage created
+serviceaccount/bookinfo-productpage created
+deployment.apps/productpage-v1 created
+```
+4. 查看安装的bookinfo的 pod与svc
+```sh
+> kubect get po,svc -n bookinfo
+NAME                                 READY   STATUS            RESTARTS   AGE
+pod/details-v1-698b5d8c98-twhxk      2/2     Running           0          3m7s
+pod/productpage-v1-bf4b489d8-hqktr   0/2     PodInitializing   0          3m7s
+pod/ratings-v1-5967f59c58-zh2xf      0/2     PodInitializing   0          3m7s
+pod/reviews-v1-9c6bb6658-ngmkz       0/2     PodInitializing   0          3m7s
+pod/reviews-v2-8454bb78d8-mtfd9      0/2     PodInitializing   0          3m7s
+pod/reviews-v3-6dc9897554-cggjt      0/2     PodInitializing   0          3m7s
+
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+service/details       ClusterIP   10.110.123.250   <none>        9080/TCP   3m7s
+service/productpage   ClusterIP   10.111.179.35    <none>        9080/TCP   3m7s
+service/ratings       ClusterIP   10.105.63.55     <none>        9080/TCP   3m7s
+service/reviews       ClusterIP   10.99.185.56     <none>        9080/TCP   3m7s
+```
+注意：Reviews Pod 有三个版本，生产环境，是不会同时存在 三个版本的 
+
+5. 部署 Gateway 与 VirtualService 
+修改官方示例的域名：
+```sh
+> vim samples/bookinfo/networking/book-gateway.yaml
+...
+ hosts:
+ - "bookinfo.costalong.cn"
+---
+ hosts
+ - "bookinfo.costalong.cn"
+# 创建资源
+> kubectl create -f samples/bookinfo/networking/bookinfo-gateway.yaml -n bookinfo
+```
+6. 查看安装的资源
+```sh
+> kubectl get gw,vs -n bookinfo
+NAME                                           AGE
+gateway.networking.istio.io/bookinfo-gateway   75s
+
+NAME                                          GATEWAYS               HOSTS                       AGE
+virtualservice.networking.istio.io/bookinfo   ["bookinfo-gateway"]   ["bookinfo.costalong.cn"]   75s
+```
+ 将域名 bookinfo.costalong.cn 进行解析到集群任意安装 kube-proxy 的节点Ip上
