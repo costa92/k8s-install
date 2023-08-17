@@ -61,4 +61,4 @@ EOF
 kubectl apply -f default-storage-class.yaml
 ```
 删除重新安装
-
+参考：https://ask.kubesphere.io/forum/d/7194-kubekeyk8skubesphere-default-storageclass-was-not-found
