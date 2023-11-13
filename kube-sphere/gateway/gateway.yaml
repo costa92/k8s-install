@@ -1,0 +1,37 @@
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: Gateway
+metadata:
+  name: kubesphere-gateway
+  namespace: kubesphere-system
+spec:
+  gatewayClassName: my-gateway-class
+  listeners:
+    - name: kubesphere
+      # hostname: "*.costalong.cn"
+      protocol: HTTP
+      port: 80
+---
+apiVersion: gateway.networking.k8s.io/v1alpha2
+kind: HTTPRoute
+metadata:
+  name: kubesphere-http
+  namespace: kubesphere-system
+  labels:
+    app: traefik
+spec:
+  parentRefs: #绑定 Gateway 监听项
+    - name: kubesphere-gateway 
+  hostnames:
+    - sphere.costalong.cn
+  rules:
+  - matches: # 匹配条件
+    - path: # 匹配路径
+        type: PathPrefix
+        value: /
+  - backendRefs:                          # [14]
+      - name: ks-console                  # [15]
+        weight: 1                         # [16]
+        port: 80
+
+
+

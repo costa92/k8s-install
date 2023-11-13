@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: 
+  name: blog-web-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: blog-web
+  template:
+    metadata:
+      labels:
+        app: blog-web
+    spec:
+      containers:
+       - name: blog-web
+         image: costa92/my-blog:local-20231111194616
+         ports:
+         - name: http
+           containerPort: 80
+           protocol: TCP
